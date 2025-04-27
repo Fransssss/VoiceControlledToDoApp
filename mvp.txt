@@ -1,0 +1,23 @@
+Core Features (MVP)
+
+- [Voice Recognition]: Listen for voice commands.
+
+- [Add Task]: "Add task: buy groceries."
+
+- [Remove Task]: "Delete task: buy groceries."
+
+- [Complete Task]: "Mark task complete: buy groceries."
+
+- [View Tasks]: Display current tasks.
+
+- [Accessibility]: High-contrast UI, large buttons, voice feedback ("Task added").
+
+
+Stretch Goals (Extra Points)
+- Offline Mode (PWA/Web or Mobile local storage).
+
+- Confirmation Voice Feedback ("Task completed").
+
+- Simple User Accounts (optional).
+
+- Natural Language Understanding (NLU) (e.g., "I need to call mom tomorrow" → auto-add).

@@ -1,0 +1,15 @@
+Why This App?
+
+- Accessibility First: 
+Designed to make task management easy for all users, 
+including those with mobility or vision challenges.
+
+- Voice-Operated: 
+No typing required — just speak to manage your tasks.
+
+- Lightweight & Fast: 
+Simple frontend + Python backend.
+
+- Real-World Use: 
+Shows full-stack skills, 
+clean architecture, and commitment to inclusive tech.
