@@ -1,0 +1,6 @@
+Tech Stack
+
+- Frontend: HTML, CSS, JavaScript
+- Frontend Voice : Web Speech API or Android SpeechRecognizer API 
+- Backend: Python (Flask)
+- Database: LocalStorage (Web) or SQLite (Web/Mobile)

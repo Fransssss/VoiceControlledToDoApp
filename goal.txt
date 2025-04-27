@@ -1,0 +1,9 @@
+Build a simple Todo List app that can be fully operated by voice, accessible for people with disabilities.
+
+- Add, Remove, Mark Complete tasks by speaking.
+
+- Frontend: Web App (HTML/CSS/JavaScript) or Mobile (Android Kotlin).
+
+- Backend: Python (Flask or FastAPI).
+
+- Stretch Goal: Offline Mode + Local Data Persistence.
