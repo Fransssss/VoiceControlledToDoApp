@@ -45,8 +45,9 @@ if (!SpeechRecognition){
         // Final validation
         if (
             cleanName.length === 0 ||
-            /^[\W\d]+$/g.test(cleanName) // Reject if it's just symbols or numbers
+            /^[\W\d]+$/g.test(cleanName)               // Reject if it's just symbols or numbers
         ) {
+            showFriendlyError()                        // Ask user to say the prompt again
             return false;
         }
     
@@ -148,7 +149,7 @@ if (!SpeechRecognition){
         showFriendlyError();
         // speak("Sorry, I didn’t catch that. Try again.");
     });
-    
+
 }
 
 
