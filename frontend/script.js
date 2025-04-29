@@ -24,6 +24,17 @@ if (!SpeechRecognition){
         }
     }      
 
+    // Friendly Visual Feedback / Message 
+    function showFriendlyError(message = "Sorry, I didn’t catch that. Try again?") {
+        const feedback = document.getElementById("voice-feedback");
+        feedback.textContent = message;
+        feedback.style.display = "block";
+    
+        setTimeout(() => {
+            feedback.style.display = "none";
+        }, 3000);
+    }
+    
     // Prevent empty / bad^ tasks
     function isValidTask(taskName) {
         let cleanName = taskName.trim();               // Remove extra spaces
@@ -110,6 +121,8 @@ if (!SpeechRecognition){
         smoothTextChange("Stop Listening");
         startButton.classList.add("listening-btn");
         document.querySelector(".todo-container").classList.add("listening-container");
+
+        showFriendlyError("Try saying 'Add task walk the dog'.");
     })
 
     // When recognition stop
@@ -117,7 +130,9 @@ if (!SpeechRecognition){
         isListening = false; 
         smoothTextChange("Start Listening");
         startButton.classList.remove("listening-btn");
-        document.querySelector(".todo-container").classList.remove("listening-container"); 
+        document.querySelector(".todo-container").classList.remove("listening-container");
+        
+        showFriendlyError("Done listening. Try again if needed!");
     })
 
     // When something is said 
@@ -128,19 +143,13 @@ if (!SpeechRecognition){
     })
 
     // Handle any recognition error (i.e. microphone issue, etc)
-    recognition.addEventListener("error",(event) => {
-        console.log("> Error: ",event.error);
-    })
-
-
-
-
-
-
-
-
-
-
-
-
+    recognition.addEventListener("error", (event) => {
+        console.log("! Error: ", event.error);
+        showFriendlyError();
+        // speak("Sorry, I didn’t catch that. Try again.");
+    });
+    
 }
+
+
+

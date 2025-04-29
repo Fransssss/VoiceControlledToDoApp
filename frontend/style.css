@@ -93,6 +93,14 @@ ul#task-list li {
     color: white;
 }
 
+#voice-feedback {
+    display:none; 
+    color:#666; 
+    margin-top:12px; 
+    font-size:16px; 
+    text-align:center;
+}
+
 #empty-message {
     color: #666;
     font-size: 18px;
