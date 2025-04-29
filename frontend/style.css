@@ -5,61 +5,99 @@
     color: #111;
 }
 
-h1{
+.title{
     font-weight: 700;
 }
 
-.body {
+/* Body setup */
+body {
     margin: 0;
-    padding: 40px;  /* natural visual breathing space */
     height: 100vh;
-    background-size: cover;
+    background: linear-gradient(135deg, #e8eaee, #e6e7e9); /* Gentle soft gradient */
     display: flex;
     justify-content: center;
-    align-items: start;
-    backdrop-filter: blur(5px); /* slight blur overall */
+    align-items: flex-start;
+    padding: 40px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Box that grows as content grows */
+/* The container */
 .todo-container {
-    background:rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85); /* Softer white */
     border-radius: 16px;
     padding: 30px 20px;
     width: 90%;
-    max-width: 400px;
+    max-width: 500px;
     min-height: 200px;
-    backdrop-filter: blur(10px); /* strong blur inside box */
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    margin-top: 40px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: all 0.3s ease;
 }
 
-#start-record-btn{
+/* Glow when listening */
+.listening-container {
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.8); /* Wider green glow */
+    border: 2px solid rgba(46, 204, 113, 0.6);
+}
+
+/* Title */
+h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Task list */
+ul#task-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 100%;
+    text-align: left;
+}
+
+ul#task-list li {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    font-size: 18px;
+    color: #222;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+  /* Button default (start listening) */
+#start-record-btn {
     padding: 14px 28px;
+    font-size: 20px;
     background-color: #2ecc71; /* Fresh green */
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, opacity 0.2s ease;
 }
 
-#start-record-btn:hover{
-    cursor: pointer;
-}
-
-/* When listening */
-/* Listening State: button red + todo container glow */
+/* Button when listening */
 .listening-btn {
-    background-color:  #e74c3c !important; /* Friendly soft red */
-    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); /* Red button glow */
+    background-color: #e74c3c !important; /* Friendly soft red */
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+    color: white;
 }
 
-  /* Listening State: todo container glow */
+  /* Smooth glow pulse (optional bonus) */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); }
+    50% { box-shadow: 0 0 30px rgba(46, 204, 113, 1); }
+    100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.6); }
+}
+
 .listening-container {
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.8); /* Smooth green glow */
-    border: 2px solid rgba(46, 204, 113, 0.8); /* Green border */
-    backdrop-filter: blur(10px);
+    animation: pulseGlow 2s infinite; /* Breathing glow */
 }
