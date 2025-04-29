@@ -1,135 +1,146 @@
-// Check if the browser supports Web Speech API
+// const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-// If not supported, show an alert
-if (!SpeechRecognition) {
-    alert("Sorry, your browser doesn't support Speech Recognition.");
+if (!SpeechRecognition){
+    alert("Sorry, Your browser does not support speech recognition")
 } else {
-    // Create a new SpeechRecognition instance
-    const recognition = new SpeechRecognition();
+    const recognition = new SpeechRecognition()
     recognition.lang = 'en-US';                 // Set language to English (United States)
     recognition.continuous = false;             // Listen for one command at a time
     recognition.interimResults = false;         // Only final results, not partial guesses
 
     // Get the start button and task list elements from the page
-    const startButton = document.getElementById('start-record-btn');
-    const taskList = document.getElementById('task-list');
+    const startButton = document.getElementById("start-listen-btn")
+    const taskList = document.getElementById("task-list")
+
+    // Show/ hide empty message
+    function updateEmptyMessage() {
+        const emptyMessage = document.getElementById('empty-message');
+        if (taskList.children.length === 0) {
+          emptyMessage.style.display = "block"; // Show message if no tasks
+        } else {
+          emptyMessage.style.display = "none"; // Hide message if there are tasks
+        }
+    }      
+
+    // Prevent empty / bad^ tasks
+    function isValidTask(taskName) {
+        let cleanName = taskName.trim();               // Remove extra spaces
+        cleanName = cleanName.replace(/^[\W_]+/g, ""); // Remove all non-word chars from start
+        cleanName = cleanName.replace(/[\W_]+$/g, ""); // Remove all non-word chars from end
+        cleanName = cleanName.replace(/\s{2,}/g, " "); // Fix double spaces
+    
+        // Final validation
+        if (
+            cleanName.length === 0 ||
+            /^[\W\d]+$/g.test(cleanName) // Reject if it's just symbols or numbers
+        ) {
+            return false;
+        }
+    
+        return true;
+    }
+    
 
     // Function to add a new task to the list
     function addTask(taskName) {
-        const li = document.createElement('li'); // Create a new list item
-        li.textContent = taskName;               // Set the task text
-        li.setAttribute('data-task', taskName.toLowerCase()); // Store task name in lowercase for easy search
-        taskList.appendChild(li);                // Add the task to the list
-        speak(`Task added: ${taskName}`);        // Give voice feedback
-    }
+        if (isValidTask(taskName)){
+            // Validate taskName again
+            let cleanName = taskName.trim();
+            cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
+            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
 
-    // Function to mark a task as complete
-    function completeTask(taskName) {
-        const items = taskList.querySelectorAll('li'); // Get all tasks
-        for (let item of items) {
-            if (item.getAttribute('data-task') === taskName.toLowerCase()) {
-                item.style.textDecoration = 'line-through'; // Cross out the completed task
-                speak(`Task completed: ${taskName}`);       // Voice feedback
-                return;                                     // Stop after completing the task
-            }
+            const li = document.createElement("li");
+        
+            const taskCount = taskList.children.length + 1;                   // Count how many tasks already
+            taskName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize first letter
+            li.textContent = `${taskCount}. ${cleanName}`;                     // Add number before task name
+        
+            li.setAttribute("data-task", cleanName.toLowerCase()); // Keep hidden original task name
+            taskList.appendChild(li);
+        
+            updateEmptyMessage();                                 // hide 'empty message' text when task added
+            // speak(`Task added: ${taskName}`); // Optional voice feedback
+        } else {
+            console.log("! Ignored empty / bad task.");
         }
-        speak(`Task not found: ${taskName}`); // If no matching task is found
     }
+    
+    // Function to mark a task as complete
+    // TBA
 
     // Function to delete a task from the list
-    function deleteTask(taskName) {
-        const items = taskList.querySelectorAll('li');  // Get all tasks
-        for (let item of items) {
-            if (item.getAttribute('data-task') === taskName.toLowerCase()) {
-                item.remove();                          // Remove the matching task
-                speak(`Task deleted: ${taskName}`);     // Voice feedback
-                return;                                 // Stop after deleting
-            }
-        }
-        speak(`Task not found: ${taskName}`);           // If no matching task is found
-    }
+    // TBA
 
-    // Function to make the app "speak" a message back to the user
-    function speak(text) {
-        const synth = window.speechSynthesis;                 // Access the SpeechSynthesis API
-        const utterance = new SpeechSynthesisUtterance(text); // Create a speech message
-        synth.speak(utterance);                               // Speak the message
-    }
+    // Function to show / list task
 
     // Function to handle the voice command and decide what to do
     function handleVoiceCommand(command) {
-        if (command.startsWith("add task")) {
-            const taskName = command.replace("add task", "").trim();     // Get the task name
-            addTask(taskName);      // Add the task
-        } else if (command.startsWith("complete task")) {
-            const taskName = command.replace("complete task", "").trim(); // Get the task name
-            completeTask(taskName); // Complete the task
-        } else if (command.startsWith("delete task")) {
-            const taskName = command.replace("delete task", "").trim();   // Get the task name
-            deleteTask(taskName);   // Delete the task
-        } else {
-            speak("Sorry, I didn't understand the command.");             // Speak if command is not recognized
+        if (command.startsWith("add task")){
+            const taskName = command.replace("add task","").trim();
+            addTask(taskName);
         }
+        // delete task 
+
+        // complete task 
+
+        // show task
+
     }
 
-    let isListening = false // Track if web is currently listening
+    let isListening = false                    // Track if web is currently listening
 
-    // When user clicks the "Start Listening" button, start voice recognition
-    startButton.addEventListener('click', () => {
-        if (!isListening) {
-            //recognition.start();
-
-            //NOTE : temporary
-            isListening = !isListening
-            startButton.textContent = "Stop Listening"
-            startButton.classList.add('listening-btn'); // Turn button red
-            document.querySelector('.todo-container').classList.add('listening-container'); // Glow the container
-        } else {
-            //recognition.stop();
-
-            //NOTE : temporary
-            isListening = !isListening
-            startButton.textContent = "Start Listening"
-            startButton.classList.remove('listening-btn'); // Restore green button
-            document.querySelector('.todo-container').classList.remove('listening-container'); // Remove container glow
-        }
-    });
-
-    // smooth text transition
-    function smoothTextChange(newText) {
-        startButton.style.opacity = 0; // Fade out
-        setTimeout(() => {
-            startButton.textContent = newText; // Change text when faded
-            startButton.style.opacity = 1; // Fade back in
-        }, 200); // 150ms fade
+    function smoothTextChange(newText){
+        startButton.style.opacity = 0;         // Fade out 
+        setTimeout( () => {
+            startButton.textContent = newText; // Change text
+            startButton.style.opacity = 1; 
+        }, 150);                               // 150ms fade
     }
     
-    // when recognition start
+    // When user clicks 'start listening' button
+    startButton.addEventListener("click", () => {
+        recognition.start()
+    })
+
+    // When recognition start
     recognition.addEventListener("start", () => {
-        isListening = true;
+        isListening = true; 
         smoothTextChange("Stop Listening");
-        startButton.classList.add('listening-btn'); // Turn button red
-        document.querySelector('.todo-container').classList.add('listening-container'); // Glow the container
+        startButton.classList.add("listening-btn");
+        document.querySelector(".todo-container").classList.add("listening-container");
     })
 
-    // when recognition stop
-    recognition.addEventListener("end",() => {
-        isListening = false;
+    // When recognition stop
+    recognition.addEventListener("end", () => {
+        isListening = false; 
         smoothTextChange("Start Listening");
-        startButton.classList.remove('listening-btn'); // Restore green button
-        document.querySelector('.todo-container').classList.remove('listening-container'); // Remove container glow
+        startButton.classList.remove("listening-btn");
+        document.querySelector(".todo-container").classList.remove("listening-container"); 
     })
 
-    // When a voice command is successfully recognized
-    recognition.addEventListener('result', (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase().trim(); // Get the spoken text
-        console.log("Heard:", transcript);    // Log it for debugging
-        handleVoiceCommand(transcript);       // Process the spoken command
-    });
+    // When something is said 
+    recognition.addEventListener("result", (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        console.log("> I heard you said: ",transcript);
+        handleVoiceCommand(transcript)
+    })
 
-    // Handle any recognition errors (like microphone issues)
-    recognition.addEventListener('error', (event) => {
-        console.error("Error:", event.error); // Log the error
-    });
+    // Handle any recognition error (i.e. microphone issue, etc)
+    recognition.addEventListener("error",(event) => {
+        console.log("> Error: ",event.error);
+    })
+
+
+
+
+
+
+
+
+
+
+
+
 }
