@@ -26,6 +26,11 @@ closeBtn.addEventListener("click", () => {
     popup.style.display = "none";
 });
 
+// Handle task duplication confirmation
+let isWaitingForDuplicationConfirmation = false;
+let pendingTaskName = "";
+
+
 // Main voice controlled app
 if (!SpeechRecognition){
     alert("Sorry, Your browser does not support speech recognition")
@@ -79,29 +84,48 @@ if (!SpeechRecognition){
         return true;
     }
     
+    // Function to check if a task has alreay exist
+    function isDuplicatedTaskConfirmation(taskName){
+        if(isValidTask){
+            let cleanName = taskName.trim()
+            .replace(/^[\W_]+/g, "")
+            .replace(/[\W_]+$/g, "")
+            .replace(/\s{2,}/g, " ");
+
+            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+            const items = taskList.querySelectorAll('li');
+            for (let item of items) {
+                if (item.textContent.includes(cleanName)) {
+                    // Task already exists → ask for confirmation
+                    awaitingConfirmation = true;
+                    pendingTaskName = cleanName;
+                    document.getElementById("confirm-popup").style.display = "flex";
+                    // speak(`Task "${cleanName}" already exists. Say yes to add it anyway.`);
+                    return;  // yes, task has already existed
+                }
+            }
+            return;
+        } 
+    }
 
     // Function to add a new task to the list
-    function addTask(taskName) {
-        if (isValidTask(taskName)){
-            // Validate taskName again
-            let cleanName = taskName.trim();
-            cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
-            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
+    function addTask(taskName){
+        if(isValidTask(taskName)){
+            let cleanName = taskName.trim()
+            .replace(/^[\W_]+/g, "")
+            .replace(/[\W_]+$/g, "")
+            .replace(/\s{2,}/g, " ");
+
+            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
 
             const li = document.createElement("li");
-        
-            const taskCount = taskList.children.length + 1;                   // Count how many tasks already
-            taskName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize first letter
-            li.textContent = `${taskCount}. ${cleanName}`;                     // Add number before task name
-        
-            li.setAttribute("data-task", cleanName.toLowerCase()); // Keep hidden original task name
+            const taskCount = taskList.children.length + 1;
+            li.textContent  = `${taskCount}. ${cleanName}`;
+            li.setAttribute("data-task",cleanName.toLowerCase());
             taskList.appendChild(li);
-        
-            updateEmptyMessage();                                 // hide 'empty message' text when task added
-            // speak(`Task added: ${taskName}`); // Optional voice feedback
-            return 
-        } else {
-            console.log("! Ignored empty / bad task.");
+            updateEmptyMessage();
+            // speak("Task added: ${cleanName}")
         }
     }
     
@@ -152,6 +176,22 @@ if (!SpeechRecognition){
 
     // Function to handle the voice command and decide what to do
     function handleVoiceCommand(command) {
+        command = command.toLowerCase().trim();
+
+        // check if duplication confirmation is on
+        if(awaitingConfirmation){
+            if (command === "yes"){
+                addTask(pendingTaskName)
+            } else {
+                // speak("Task no added");
+                console.log("! Task is Not added: ",taskName);
+            }
+            awaitingConfirmation = false;
+            pendingTaskName = "";
+            document.getElementById("confirm-popup").style.display = "none";
+            return;
+        }
+
         // add task
         if (command.startsWith("add task")){
             const taskName = command.replace("add task","").trim();
@@ -170,7 +210,6 @@ if (!SpeechRecognition){
             completeTask(taskName);
         }
         
-
         // show task
 
     }
@@ -185,12 +224,12 @@ if (!SpeechRecognition){
         }, 150);                               // 150ms fade
     }
     
-    // When user clicks 'start listening' button
+    // *Handle when user clicks 'start listening' button
     startButton.addEventListener("click", () => {
         recognition.start()
     })
 
-    // When recognition start
+    // *Handle when recognition start
     recognition.addEventListener("start", () => {
         isListening = true; 
         smoothTextChange("Stop Listening");
@@ -200,7 +239,7 @@ if (!SpeechRecognition){
         showFriendlyFeedback("Try saying 'Add task walk the dog'.");
     })
 
-    // When recognition stop
+    // *Handle When recognition stop
     recognition.addEventListener("end", () => {
         isListening = false; 
         smoothTextChange("Start Listening");
@@ -210,20 +249,39 @@ if (!SpeechRecognition){
         showFriendlyFeedback("Done listening. Try again if needed!");
     })
 
-    // When something is said 
+    // *Handle case when something is said 
     recognition.addEventListener("result", (event) => {
         const transcript = event.results[0][0].transcript.toLowerCase().trim();
         console.log("> I heard you said: ",transcript);
         handleVoiceCommand(transcript)
     })
 
-    // Handle any recognition error (i.e. microphone issue, etc)
+    // *Handle any recognition error (i.e. microphone issue, etc)
     recognition.addEventListener("error", (event) => {
         console.log("! Error: ", event.error);
         showFriendlyFeedback();
         // speak("Sorry, I didn’t catch that. Try again.");
     });
 
+    // *Handle button for duplication confirmation pop up
+    function closeDuplicateConfirmPopup(){
+        pendingTaskName = "";
+        awaitingConfirmation = false; 
+        document.getElementById("confirm-duplicate").style.display = "none";
+    }
+
+    document.getElementById("confirm-yes").addEventListener("click",() => {
+        if(pendingTaskName){
+            addTask(pendingTaskName);
+            // speak("Task added")
+        }
+        closeDuplicateConfirmPopup();
+    })
+
+    document.getElementById("confirm-no").addEventListener("click",() => {
+        // speak("Task not added.");
+        closeDuplicateConfirmPopup();
+    });
 }
 
 
