@@ -84,8 +84,8 @@ if (!SpeechRecognition){
         return true;
     }
     
-    // Function to check if a task has alreay exist
-    function isDuplicatedTaskConfirmation(taskName){
+    // Function to check if a task has already exist
+    function isTaskDuplicated(taskName){
         if(isValidTask){
             let cleanName = taskName.trim()
             .replace(/^[\W_]+/g, "")
@@ -98,14 +98,14 @@ if (!SpeechRecognition){
             for (let item of items) {
                 if (item.textContent.includes(cleanName)) {
                     // Task already exists → ask for confirmation
-                    awaitingConfirmation = true;
+                    isWaitingForDuplicationConfirmation = true;
                     pendingTaskName = cleanName;
-                    document.getElementById("confirm-popup").style.display = "flex";
+                    document.getElementById("confirm-duplicate").style.display = "flex";
                     // speak(`Task "${cleanName}" already exists. Say yes to add it anyway.`);
-                    return;  // yes, task has already existed
+                    return; // yes, task has already existed
                 }
             }
-            return;
+            addTask(cleanName);
         } 
     }
 
@@ -179,23 +179,24 @@ if (!SpeechRecognition){
         command = command.toLowerCase().trim();
 
         // check if duplication confirmation is on
-        if(awaitingConfirmation){
+        if(isWaitingForDuplicationConfirmation){
             if (command === "yes"){
                 addTask(pendingTaskName)
             } else {
                 // speak("Task no added");
                 console.log("! Task is Not added: ",taskName);
             }
-            awaitingConfirmation = false;
+            isWaitingForDuplicationConfirmation = false;
             pendingTaskName = "";
             document.getElementById("confirm-popup").style.display = "none";
+            console.log("hey bud");
             return;
         }
 
         // add task
         if (command.startsWith("add task")){
             const taskName = command.replace("add task","").trim();
-            addTask(taskName);
+            isTaskDuplicated(taskName);
         }
         
         // delete task
@@ -266,7 +267,7 @@ if (!SpeechRecognition){
     // *Handle button for duplication confirmation pop up
     function closeDuplicateConfirmPopup(){
         pendingTaskName = "";
-        awaitingConfirmation = false; 
+        isWaitingForDuplicationConfirmation = false; 
         document.getElementById("confirm-duplicate").style.display = "none";
     }
 
