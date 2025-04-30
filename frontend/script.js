@@ -82,18 +82,41 @@ if (!SpeechRecognition){
     // Function to mark a task as complete
     // TBA
 
-    // Function to delete a task from the list
-    // TBA
+    // Function to remove a task from the list
+    function removeTask(taskName){
+        if(isValidTask(taskName)){
+            let cleanName = taskName.trim();
+            cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
+            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
+            
+            const items = taskList.includes(cleanName);
+
+            for (let item of items) {
+                if (item.textContent.includes(cleanName)){
+                    item.remove();
+                    updateEmptyMessage(); // check if list is empty now
+                    // speak("Task removed: ${cleanName}")
+                    return
+                }
+            }
+        }
+        console.log("! Sorry, ",taskName, " is not in the list");
+    }
 
     // Function to show / list task
 
     // Function to handle the voice command and decide what to do
     function handleVoiceCommand(command) {
+        // add task
         if (command.startsWith("add task")){
             const taskName = command.replace("add task","").trim();
             addTask(taskName);
         }
-        // delete task 
+        // delete task
+        else if (command.startsWith("delete task") || command.startsWith("remove task")) {
+            const taskName = command.replace(/(delete task|remove task)/, "").trim();
+            removeTask(taskName);
+        } 
 
         // complete task 
 
