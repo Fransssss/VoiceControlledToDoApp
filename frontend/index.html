@@ -9,10 +9,26 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body class="body">
-        <div class="todo-container">
 
+        <!-- instruction pop up -->
+        <div id="instruction-popup" class="popup">
+            <div class="popup-content">
+            <h2>👋 Welcome!</h2>
+            <p>Try saying things like:</p>
+            <ul>
+                <li>“Add task walk the dog”</li>
+                <li>“Remove task walk the dog”</li>
+                <li>“Complete task walk the dog”</li>
+            </ul>
+            <button id="close-popup-btn">Got it!</button>
+            </div>
+        </div>
+        
+
+        <!-- main todo container -->
+        <div class="todo-container">
             <!-- title -->
-            <h1 class="title">Voice-Controlled ToDo</h1>
+            <h1 class="title">Voice-Controlled ToDo List</h1>
 
             <input type="hidden">
 

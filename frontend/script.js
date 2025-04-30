@@ -2,6 +2,22 @@
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+// Pop up Instruction
+const popup = document.getElementById("instruction-popup");
+const closeBtn = document.getElementById("close-popup-btn");
+
+// Show popup only once per session 
+// if (!sessionStorage.getItem("instructionSeen")) {
+//     popup.style.display = "flex";
+//     sessionStorage.setItem("instructionSeen", "true");
+// }
+
+closeBtn.addEventListener("click", () => {
+    popup.style.display = "none";
+});
+
+
+// Main voice controleled app
 if (!SpeechRecognition){
     alert("Sorry, Your browser does not support speech recognition")
 } else {
@@ -25,7 +41,7 @@ if (!SpeechRecognition){
     }      
 
     // Friendly Visual Feedback / Message 
-    function showFriendlyError(message = "Sorry, I didn’t catch that. Try again?") {
+    function showFriendlyFeedback(message = "Sorry, I didn’t catch that. Try again?") {
         const feedback = document.getElementById("voice-feedback");
         feedback.textContent = message;
         feedback.style.display = "block";
@@ -74,13 +90,31 @@ if (!SpeechRecognition){
         
             updateEmptyMessage();                                 // hide 'empty message' text when task added
             // speak(`Task added: ${taskName}`); // Optional voice feedback
+            return 
         } else {
             console.log("! Ignored empty / bad task.");
         }
     }
     
     // Function to mark a task as complete
-    // TBA
+    function completeTask(taskName){
+        if(isValidTask(taskName)){
+            let cleanName = taskName.trim();
+            cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
+            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
+
+            const items = taskList.querySelectorAll("li");
+
+            for (let item of items){
+                if (item.textContent.includes(cleanName)){
+                    item.classList.add("completed");
+                    // speak("Task marked complete: ${cleanName}")
+                    return
+                }
+            }
+        }
+        console.log("! Task is not recognized");
+    }
 
     // Function to remove a task from the list
     function removeTask(taskName){
@@ -89,17 +123,19 @@ if (!SpeechRecognition){
             cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
             cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
             
-            const items = taskList.includes(cleanName);
+            const items = taskList.querySelectorAll("li");
 
             for (let item of items) {
                 if (item.textContent.includes(cleanName)){
                     item.remove();
                     updateEmptyMessage(); // check if list is empty now
                     // speak("Task removed: ${cleanName}")
+                    showFriendlyFeedback("Task is removed.")
                     return
                 }
             }
         }
+        // speak(`Sorry, I couldn't find the task: ${cleanName}`);
         console.log("! Sorry, ",taskName, " is not in the list");
     }
 
@@ -112,6 +148,7 @@ if (!SpeechRecognition){
             const taskName = command.replace("add task","").trim();
             addTask(taskName);
         }
+        
         // delete task
         else if (command.startsWith("delete task") || command.startsWith("remove task")) {
             const taskName = command.replace(/(delete task|remove task)/, "").trim();
@@ -119,6 +156,11 @@ if (!SpeechRecognition){
         } 
 
         // complete task 
+        else if (command.startsWith("complete task") || command.startsWith("mark task complete")) {
+            const taskName = command.replace(/(complete task|mark task complete)/, "").trim();
+            completeTask(taskName);
+        }
+        
 
         // show task
 
@@ -146,7 +188,7 @@ if (!SpeechRecognition){
         startButton.classList.add("listening-btn");
         document.querySelector(".todo-container").classList.add("listening-container");
 
-        showFriendlyError("Try saying 'Add task walk the dog'.");
+        showFriendlyFeedback("Try saying 'Add task walk the dog'.");
     })
 
     // When recognition stop
@@ -156,7 +198,7 @@ if (!SpeechRecognition){
         startButton.classList.remove("listening-btn");
         document.querySelector(".todo-container").classList.remove("listening-container");
         
-        showFriendlyError("Done listening. Try again if needed!");
+        showFriendlyFeedback("Done listening. Try again if needed!");
     })
 
     // When something is said 
@@ -169,7 +211,7 @@ if (!SpeechRecognition){
     // Handle any recognition error (i.e. microphone issue, etc)
     recognition.addEventListener("error", (event) => {
         console.log("! Error: ", event.error);
-        showFriendlyError();
+        showFriendlyFeedback();
         // speak("Sorry, I didn’t catch that. Try again.");
     });
 

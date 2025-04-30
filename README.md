@@ -6,7 +6,7 @@ This is a simple yet powerful Todo list application designed for everyone, espec
 - Complete tasks by speaking
 - Delete tasks by speaking
 - Friendly and accessible interface
-- Works even offline!
+- Works even offline! (future update)
 
 ## Why This App?
 Accessibility First: Designed to make task management easy for all users, including those with mobility or vision challenges.
@@ -31,15 +31,15 @@ Speak to the app using phrases like:
 
 "Add task: Buy groceries"
 
-"Mark task complete: Buy groceries"
+"Complete task: Buy groceries"
 
-"Delete task: Buy groceries"
+"Remove task: Buy groceries"
 
 The app will understand your command and update your Todo list!
 
-It will even speak back to confirm actions.
-
 ## Future Improvements
+Speak back to confirm actions.
+
 More natural voice understanding
 
 User accounts
