@@ -16,6 +16,12 @@ closeBtn.addEventListener("click", () => {
     popup.style.display = "none";
 });
 
+// Show Instruction button
+const showBtn = document.getElementById("show-instructions-btn");
+
+showBtn.addEventListener("click", () => {
+    popup.style.display = "flex";
+});
 
 // Main voice controleled app
 if (!SpeechRecognition){

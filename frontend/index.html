@@ -14,11 +14,12 @@
         <div id="instruction-popup" class="popup">
             <div class="popup-content">
             <h2>👋 Welcome!</h2>
-            <p>Try saying things like:</p>
+            <p>This app simply works with your voice!</p>
+            <p><strongSay these keywords first:</strong></p>
             <ul>
-                <li>“Add task walk the dog”</li>
-                <li>“Remove task walk the dog”</li>
-                <li>“Complete task walk the dog”</li>
+                <li><strong>“Add task”</strong> – to create a new task<br><small>e.g., “Add task walk the dog”</small></li>
+                <li><strong>“Remove task”</strong> – to delete a task<br><small>e.g., “Remove task walk the dog”</small></li>
+                <li><strong>“Complete task”</strong> – to mark it done<br><small>e.g., “Complete task walk the dog”</small></li>
             </ul>
             <button id="close-popup-btn">Got it!</button>
             </div>
@@ -32,7 +33,11 @@
 
             <input type="hidden">
 
-            <button id="start-listen-btn">Start Listening</button>
+            <div class="action-buttons">
+                <button id="start-listen-btn">Start Listening</button>
+
+                <button id="show-instructions-btn" title="How to use">ℹ️</button>
+            </div>
 
             <p id="voice-feedback"></p>
 
