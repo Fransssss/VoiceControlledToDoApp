@@ -4,26 +4,29 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 
 // Pop up Instruction
 const popup = document.getElementById("instruction-popup");
+const popupTitle = document.getElementById("popup-title")
 const closeBtn = document.getElementById("close-popup-btn");
 
 // Show popup only once per session 
-// if (!sessionStorage.getItem("instructionSeen")) {
-//     popup.style.display = "flex";
-//     sessionStorage.setItem("instructionSeen", "true");
-// }
-
-closeBtn.addEventListener("click", () => {
-    popup.style.display = "none";
-});
+if (!sessionStorage.getItem("instructionSeen")) {
+    popup.style.display = "flex";
+    popupTitle.textContent = "Welcome! 👋";
+    sessionStorage.setItem("instructionSeen", "true");
+}
 
 // Show Instruction button
 const showBtn = document.getElementById("show-instructions-btn");
 
 showBtn.addEventListener("click", () => {
     popup.style.display = "flex";
+    popupTitle.textContent = "Instructions 📘";
 });
 
-// Main voice controleled app
+closeBtn.addEventListener("click", () => {
+    popup.style.display = "none";
+});
+
+// Main voice controlled app
 if (!SpeechRecognition){
     alert("Sorry, Your browser does not support speech recognition")
 } else {
