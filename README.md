@@ -17,7 +17,7 @@ Lightweight & Fast: Simple frontend + Python backend.
 
 Real-World Use: Shows full-stack skills, clean architecture, and commitment to inclusive tech.
 
-## Built With
+## Tech Stacks
 Frontend: HTML, CSS, JavaScript, Web Speech API
 
 Backend: Python (Flask or FastAPI)
