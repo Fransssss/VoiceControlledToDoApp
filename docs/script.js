@@ -9,6 +9,7 @@ const closeBtn = document.getElementById("close-popup-btn");
 
 // Handle listener tracker if web is currently listening
 let isListening = false;
+let stopRequested = false;
 
 // Show popup only once per session 
 if (!sessionStorage.getItem("instructionSeen")) {
@@ -43,9 +44,8 @@ if (!SpeechRecognition){
 } else {
     const recognition = new SpeechRecognition()
     recognition.lang = 'en-US';                 // Set language to English (United States)
-    recognition.continuous = false;             // Listen for one command at a time
+    recognition.continuous = true;              // Listen for one command at a time
     recognition.interimResults = false;         // Only final results, not partial guesses
-    recognition.continuous = true;              // Keep listening until user stop it manually
 
     recognition.addEventListener("start", () => {
         isListening = true;
@@ -80,6 +80,16 @@ if (!SpeechRecognition){
             feedback.style.display = "none";
         }, 3000);
     }
+
+    // Detect when user says a number
+    function getTaskByNumber(index){
+        const items = taskList.querySelectorAll("li");
+        const i = parseInt(index);
+        if (isNaN(i) || i < 1 || i > items.length){
+            return null
+        }
+            return items[i-1]; // convert to 0-based index
+    }
     
     // Prevent empty / bad^ tasks
     function isValidTask(taskName) {
@@ -93,7 +103,7 @@ if (!SpeechRecognition){
             cleanName.length === 0 ||
             /^[\W\d]+$/g.test(cleanName)               // Reject if it's just symbols or numbers
         ) {
-            showFriendlyError()                        // Ask user to say the prompt again
+            showFriendlyFeedback();                        // Ask user to say the prompt again
             return false;
         }
     
@@ -102,7 +112,7 @@ if (!SpeechRecognition){
     
     // Function to check if a task has already exist
     function isTaskDuplicated(taskName){
-        if(isValidTask){
+        if(isValidTask(taskName)){
             let cleanName = taskName.trim()
             .replace(/^[\W_]+/g, "")
             .replace(/[\W_]+$/g, "")
@@ -117,7 +127,15 @@ if (!SpeechRecognition){
                     isWaitingForDuplicationConfirmation = true;
                     pendingTaskName = cleanName;
                     pendingAction = "add-duplicate";
+                    document.getElementById("confirm-message").textContent = "Task already exists. Add it anyway?";
                     document.getElementById("confirm-popup").style.display = "flex";
+
+                    // Clears the buffer and forces the app to listen only for "yes" or "no" next.
+                    recognition.abort(); // stops any active recognition, fresh start after
+                    setTimeout(() => {
+                        recognition.start(); // restart clean
+                    }, 100);
+
                     // speak(`Task "${cleanName}" already exists. Say yes to add it anyway.`);
                     return; // yes, task has already existed
                 }
@@ -147,9 +165,17 @@ if (!SpeechRecognition){
     }
     
     // Function to mark a task as complete
-    function completeTask(taskName){
-        if(isValidTask(taskName)){
-            let cleanName = taskName.trim();
+    function completeTask(taskNameOrNumber){
+        let item = getTaskByNumber(taskNameOrNumber);
+
+        if(item){
+            item.style.textDecoration = "line-through";
+            item.style.opacity = "0.6";
+            // speak("Task marked complete")
+            console.log("task marked complete");
+
+        } else if(isValidTask(taskNameOrNumber)){
+            let cleanName = taskNameOrNumber.trim();
             cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
             cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
 
@@ -158,17 +184,26 @@ if (!SpeechRecognition){
             for (let item of items){
                 if (item.textContent.includes(cleanName)){
                     item.classList.add("completed");
-                    // speak("Task marked complete: ${cleanName}")
+                    // speak("task marked complete: ${cleanName}");
                     return
                 }
             }
         }
-        console.log("! Task is not recognized");
+
+        // speak("sorry, I couldn't find that task.");
+        console.log("! Sorry, I couldn't find that task.");
     }
 
     // Function to remove a task from the list
-    function removeTask(taskName){
-        if(isValidTask(taskName)){
+    function removeTask(taskNameOrNumber){
+        let item = getTaskByNumber(taskNameOrNumber);
+
+        if(item){
+            item.remove();
+            updateEmptyMessage();
+            // speak("Task removed.")
+            console.log("Task removed");
+        } else if(isValidTask(taskName)){
             let cleanName = taskName.trim();
             cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
             cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
@@ -185,6 +220,7 @@ if (!SpeechRecognition){
                 }
             }
         }
+
         // speak(`Sorry, I couldn't find the task: ${cleanName}`);
         console.log("! Sorry, ",taskName, " is not in the list");
     }
@@ -199,11 +235,51 @@ if (!SpeechRecognition){
         }
 
         // Ask for confirmation
-        awaitingConfirmation = true;
+        isWaitingForDuplicationConfirmation = true;
         pendingAction = "clear-all";
+        pendingTaskName = "";
         document.getElementById("confirm-message").textContent = "Are you sure you want to clear all tasks?";
         document.getElementById("confirm-popup").style.display = "flex";
-        speak("Are you sure you want to clear all tasks? Say yes or click Yes to confirm.");
+        // speak("Are you sure you want to clear all tasks? Say yes or click Yes to confirm.");
+
+        // Reset recognition so we only catch "yes"/"no"
+        try {
+            recognition.abort(); // Stop current recognition
+        } catch (e) {
+            console.warn("Abort error:", e);
+        }
+        
+        setTimeout(() => {
+            try {
+                recognition.start(); // Restart fresh
+            } catch (e) {
+                console.warn("Start error:", e);
+            }
+        }, 100);
+    }
+
+    // *Handle button for duplication confirmation pop up
+    function closeConfirmPopup(){
+        pendingTaskName = "";
+        pendingAction = "";
+        isWaitingForDuplicationConfirmation = false; 
+        document.getElementById("confirm-popup").style.display = "none";
+
+        // Optional: flush recognition buffer
+        try {
+            recognition.abort(); // Stop current recognition if still active
+        } catch (e) {
+            console.warn("Recognition abort failed:", e);
+        }
+
+        // Restart fresh
+        setTimeout(() => {
+            try {
+            recognition.start();
+            } catch (e) {
+            console.warn("Recognition already active:", e);
+            }
+        }, 300); // slight delay for smoother restart
     }
 
     // Function to show / list task
@@ -211,50 +287,72 @@ if (!SpeechRecognition){
     // Function to handle the voice command and decide what to do
     function handleVoiceCommand(command) {
         command = command.toLowerCase().trim();
+        console.log("> I heard: ",command);
 
-        // check if duplication confirmation is on
-        if(isWaitingForDuplicationConfirmation){
+        // check if duplication confirmation is true
+        console.log("! is waiting !",isWaitingForDuplicationConfirmation);
+        if (isWaitingForDuplicationConfirmation) {
+            command = command.replace(/\.$/, ""); // remove period
             if (command === "yes") {
                 if (pendingAction === "add-duplicate") {
-                    addTask(pendingTaskName);
-                    // speak(`Task added: ${pendingTaskName}`);
+                    console.log("Initiate duplication...");
+                    addTask(pendingTaskName); // allow duplicate
                 } else if (pendingAction === "clear-all") {
-                    clearTasks();
+                    console.log("Clearing task...");
+                    taskList.innerHTML = "";
                     updateEmptyMessage();
-                    // speak("All tasks have been cleared.");
                 }
+                // speak("Action confirmed.");
+                closeConfirmPopup();
+            } else if (command === "no") {
+                // speak("Okay, no action taken.");
                 closeConfirmPopup();
             } else {
-                speak("Action canceled.");
-                closeConfirmPopup();
+                console.log("! Say 'yes' to confirm, or 'no' to cancel. ");
+                // speak("Say 'yes' to confirm, or 'no' to cancel.");
             }
-            return; 
-        }
+            return; // Don't handle normal commands while waiting
+        }        
 
-        // add task
+        // Add task
         if (command.startsWith("add task")){
             const taskName = command.replace("add task","").trim();
+            console.log("Initiate add task...");
             isTaskDuplicated(taskName);
         }
         
-        // delete task
+        // Delete task
         else if (command.startsWith("delete task") || command.startsWith("remove task")) {
             const taskName = command.replace(/(delete task|remove task)/, "").trim();
+            console.log("Initiate delete task...");
             removeTask(taskName);
         } 
 
-        // complete task 
+        // Complete task 
         else if (command.startsWith("complete task") || command.startsWith("mark task complete")) {
             const taskName = command.replace(/(complete task|mark task complete)/, "").trim();
+            console.log("Initiate complete task...");
             completeTask(taskName);
         }
         
-        // clear task 
-        if (command == "clear tasks" || command === "clear task" || command == "remove all tasks" ) {
+        // Clear task 
+        else if (command.startsWith("clear tasks") || command.startsWith("clear task") || command.startsWith("remove all tasks")) {
+            console.log("Initiate clear task...");
             clearTasks();
         }
 
-        // show task
+        else if (command.startsWith("stop") || command === "stop"){
+            console.log("Shutting down listener...");
+            isListening = false; 
+            stopRequested = true;
+            recognition.stop();
+
+            smoothTextChange("Start Listening");
+            startButton.classList.remove("listening-btn");
+            document.querySelector(".todo-container").classList.remove("listening-container");
+        }
+
+        // Show task
 
     }
 
@@ -268,12 +366,22 @@ if (!SpeechRecognition){
     
     // *Handle when user clicks 'start listening' button
     startButton.addEventListener("click", () => {
-        recognition.start()
-    })
+        if (!isListening) {
+            try {
+            recognition.start();
+            } catch (e) {
+            console.warn("! Recognition already started.");
+            }
+        } else {
+            stopRequested = true; // block auto-restart
+            recognition.stop();   // stops listening
+        }
+    });
 
     // *Handle when recognition start
     recognition.addEventListener("start", () => {
         isListening = true; 
+        stopRequested = false;
         smoothTextChange("Stop Listening");
         startButton.classList.add("listening-btn");
         document.querySelector(".todo-container").classList.add("listening-container");
@@ -288,13 +396,21 @@ if (!SpeechRecognition){
         startButton.classList.remove("listening-btn");
         document.querySelector(".todo-container").classList.remove("listening-container");
         
+        // Restart only when not in confirmation
+        if (!stopRequested && !isWaitingForDuplicationConfirmation){
+            try {
+                recognition.start();
+            } catch (e) {
+                console.log("Recognition is running...");
+            }
+        }
+
         showFriendlyFeedback("Done listening. Try again if needed!");
     })
 
     // *Handle case when something is said 
     recognition.addEventListener("result", (event) => {
         const transcript = event.results[0][0].transcript.toLowerCase().trim();
-        console.log("> I heard you said: ",transcript);
         handleVoiceCommand(transcript)
     })
 
@@ -305,13 +421,6 @@ if (!SpeechRecognition){
         // speak("Sorry, I didn’t catch that. Try again.");
     });
 
-    // *Handle button for duplication confirmation pop up
-    function closeDuplicateConfirmPopup(){
-        pendingTaskName = "";
-        isWaitingForDuplicationConfirmation = false; 
-        document.getElementById("confirm-duplicate").style.display = "none";
-    }
-
     // *Handle 'yes' btn
     document.getElementById("confirm-yes").addEventListener("click", () => {
         if (pendingAction === "add-duplicate") {
@@ -319,7 +428,6 @@ if (!SpeechRecognition){
             // speak(`Task added: ${pendingTaskName}`);
         } else if (pendingAction === "clear-all") {
             clearTasks();
-            updateEmptyMessage();
             // speak("All tasks have been cleared.");
         }
         closeConfirmPopup();
@@ -328,9 +436,6 @@ if (!SpeechRecognition){
     // *Handle 'no' btn
     document.getElementById("confirm-no").addEventListener("click",() => {
         // speak("Task not added.");
-        closeDuplicateConfirmPopup();
+        closeConfirmPopup();
     });
 }
-
-
-
