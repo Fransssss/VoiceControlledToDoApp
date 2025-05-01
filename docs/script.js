@@ -7,6 +7,9 @@ const popup = document.getElementById("instruction-popup");
 const popupTitle = document.getElementById("popup-title")
 const closeBtn = document.getElementById("close-popup-btn");
 
+// Handle listener tracker if web is currently listening
+let isListening = false;
+
 // Show popup only once per session 
 if (!sessionStorage.getItem("instructionSeen")) {
     popup.style.display = "flex";
@@ -43,6 +46,10 @@ if (!SpeechRecognition){
     recognition.continuous = false;             // Listen for one command at a time
     recognition.interimResults = false;         // Only final results, not partial guesses
     recognition.continuous = true;              // Keep listening until user stop it manually
+
+    recognition.addEventListener("start", () => {
+        isListening = true;
+    });
 
     // Re-trigger if 'end' is fired unexpectedly
     if (isListening && !awaitingConfirmation) {
@@ -221,7 +228,7 @@ if (!SpeechRecognition){
                 speak("Action canceled.");
                 closeConfirmPopup();
             }
-            return; /
+            return; 
         }
 
         // add task
@@ -250,8 +257,6 @@ if (!SpeechRecognition){
         // show task
 
     }
-
-    let isListening = false                    // Track if web is currently listening
 
     function smoothTextChange(newText){
         startButton.style.opacity = 0;         // Fade out 
