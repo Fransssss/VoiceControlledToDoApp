@@ -82,13 +82,15 @@ if (!SpeechRecognition){
     }
 
     // Detect when user says a number
-    function getTaskByNumber(index){
+    function getTaskByNumber(index) {
         const items = taskList.querySelectorAll("li");
-        const i = parseInt(index);
-        if (isNaN(i) || i < 1 || i > items.length){
-            return null
+        const i = parseInt(index.trim());
+        console.log("This is items > i: ",i);
+        if (isNaN(i) || i < 1 || i > items.length) {
+            return null;
         }
-            return items[i-1]; // convert to 0-based index
+    
+        return items[i - 1]; // e.g., 1 returns items[0]
     }
     
     // Prevent empty / bad^ tasks
@@ -167,7 +169,7 @@ if (!SpeechRecognition){
     // Function to mark a task as complete
     function completeTask(taskNameOrNumber){
         let item = getTaskByNumber(taskNameOrNumber);
-
+        console.log("> This is item: ",item);
         if(item){
             item.style.textDecoration = "line-through";
             item.style.opacity = "0.6";
@@ -203,8 +205,8 @@ if (!SpeechRecognition){
             updateEmptyMessage();
             // speak("Task removed.")
             console.log("Task removed");
-        } else if(isValidTask(taskName)){
-            let cleanName = taskName.trim();
+        } else if(isValidTask(taskNameOrNumber)){
+            let cleanName = taskNameOrNumber.trim();
             cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
             cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
             
