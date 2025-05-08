@@ -37,7 +37,6 @@ let pendingTaskName = "";
 // Handle all task deletion
 let pendingAction = ""; // track what the "yes" will trigger
 
-
 // Main voice controlled app
 if (!SpeechRecognition){
     alert("Sorry, Your browser does not support speech recognition")
@@ -167,98 +166,98 @@ if (!SpeechRecognition){
     }
     
     // Function to mark a task as complete
-    function completeTask(taskNameOrNumber){
-        let item = getTaskByNumber(taskNameOrNumber);
-        console.log("> This is item: ",item);
-        if(item){
-            item.style.textDecoration = "line-through";
-            item.style.opacity = "0.6";
-            // speak("Task marked complete")
-            console.log("task marked complete");
+    // function completeTask(taskNameOrNumber){
+    //     let item = getTaskByNumber(taskNameOrNumber);
+    //     console.log("> This is item: ",item);
+    //     if(item){
+    //         item.style.textDecoration = "line-through";
+    //         item.style.opacity = "0.6";
+    //         // speak("Task marked complete")
+    //         console.log("task marked complete");
 
-        } else if(isValidTask(taskNameOrNumber)){
-            let cleanName = taskNameOrNumber.trim();
-            cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
-            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
+    //     } else if(isValidTask(taskNameOrNumber)){
+    //         let cleanName = taskNameOrNumber.trim();
+    //         cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
+    //         cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
 
-            const items = taskList.querySelectorAll("li");
+    //         const items = taskList.querySelectorAll("li");
 
-            for (let item of items){
-                if (item.textContent.includes(cleanName)){
-                    item.classList.add("completed");
-                    // speak("task marked complete: ${cleanName}");
-                    return
-                }
-            }
-        }
+    //         for (let item of items){
+    //             if (item.textContent.includes(cleanName)){
+    //                 item.classList.add("completed");
+    //                 // speak("task marked complete: ${cleanName}");
+    //                 return
+    //             }
+    //         }
+    //     }
 
-        // speak("sorry, I couldn't find that task.");
-        console.log("! Sorry, I couldn't find that task.");
-    }
+    //     // speak("sorry, I couldn't find that task.");
+    //     console.log("! Sorry, I couldn't find that task.");
+    // }
 
     // Function to remove a task from the list
-    function removeTask(taskNameOrNumber){
-        let item = getTaskByNumber(taskNameOrNumber);
+    // function removeTask(taskNameOrNumber){
+    //     let item = getTaskByNumber(taskNameOrNumber);
 
-        if(item){
-            item.remove();
-            updateEmptyMessage();
-            // speak("Task removed.")
-            console.log("Task removed");
-        } else if(isValidTask(taskNameOrNumber)){
-            let cleanName = taskNameOrNumber.trim();
-            cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
-            cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
+    //     if(item){
+    //         item.remove();
+    //         updateEmptyMessage();
+    //         // speak("Task removed.")
+    //         console.log("Task removed");
+    //     } else if(isValidTask(taskNameOrNumber)){
+    //         let cleanName = taskNameOrNumber.trim();
+    //         cleanName = cleanName.replace(/^[\W_]+/g, "").replace(/[\W_]+$/g, "").replace(/\s{2,}/g, " ");
+    //         cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1); // Capitalize
             
-            const items = taskList.querySelectorAll("li");
+    //         const items = taskList.querySelectorAll("li");
 
-            for (let item of items) {
-                if (item.textContent.includes(cleanName)){
-                    item.remove();
-                    updateEmptyMessage(); // check if list is empty now
-                    // speak("Task removed: ${cleanName}")
-                    showFriendlyFeedback("Task is removed.")
-                    return
-                }
-            }
-        }
+    //         for (let item of items) {
+    //             if (item.textContent.includes(cleanName)){
+    //                 item.remove();
+    //                 updateEmptyMessage(); // check if list is empty now
+    //                 // speak("Task removed: ${cleanName}")
+    //                 showFriendlyFeedback("Task is removed.")
+    //                 return
+    //             }
+    //         }
+    //     }
 
-        // speak(`Sorry, I couldn't find the task: ${cleanName}`);
-        console.log("! Sorry, ",taskName, " is not in the list");
-    }
+    //     // speak(`Sorry, I couldn't find the task: ${cleanName}`);
+    //     console.log("! Sorry, ",taskName, " is not in the list");
+    // }
 
     // Function to clear all task 
-    function clearTasks() {
-        const items = taskList.querySelectorAll("li");
-        if (items.length === 0){
-            // speak("You have no tasks to clear")
-            console.log("! You have no tasks to clear");
-            return
-        }
+    // function clearTasks() {
+    //     const items = taskList.querySelectorAll("li");
+    //     if (items.length === 0){
+    //         // speak("You have no tasks to clear")
+    //         console.log("! You have no tasks to clear");
+    //         return
+    //     }
 
-        // Ask for confirmation
-        isWaitingForDuplicationConfirmation = true;
-        pendingAction = "clear-all";
-        pendingTaskName = "";
-        document.getElementById("confirm-message").textContent = "Are you sure you want to clear all tasks?";
-        document.getElementById("confirm-popup").style.display = "flex";
-        // speak("Are you sure you want to clear all tasks? Say yes or click Yes to confirm.");
+    //     // Ask for confirmation
+    //     isWaitingForDuplicationConfirmation = true;
+    //     pendingAction = "clear-all";
+    //     pendingTaskName = "";
+    //     document.getElementById("confirm-message").textContent = "Are you sure you want to clear all tasks?";
+    //     document.getElementById("confirm-popup").style.display = "flex";
+    //     // speak("Are you sure you want to clear all tasks? Say yes or click Yes to confirm.");
 
-        // Reset recognition so we only catch "yes"/"no"
-        try {
-            recognition.abort(); // Stop current recognition
-        } catch (e) {
-            console.warn("Abort error:", e);
-        }
+    //     // Reset recognition so we only catch "yes"/"no"
+    //     try {
+    //         recognition.abort(); // Stop current recognition
+    //     } catch (e) {
+    //         console.warn("Abort error:", e);
+    //     }
         
-        setTimeout(() => {
-            try {
-                recognition.start(); // Restart fresh
-            } catch (e) {
-                console.warn("Start error:", e);
-            }
-        }, 100);
-    }
+    //     setTimeout(() => {
+    //         try {
+    //             recognition.start(); // Restart fresh
+    //         } catch (e) {
+    //             console.warn("Start error:", e);
+    //         }
+    //     }, 100);
+    // }
 
     // *Handle button for duplication confirmation pop up
     function closeConfirmPopup(){
