@@ -18,14 +18,15 @@ if(!SpeechRecognition){
             // Remove associated task if exist
             // Popup shows up - 'task does not exist'
     
-    // 3. Remove task 
+    // 3. Remove a task 
         // Remove by (full) task name 
         // Remove by associated number 
             // Remove associated task if exist
             // Popup shows up - 'task does not exist'
-            
+    
+    // 4. Clear all task 
+        // Is there at least one task ?
+            // Yes - shows popup confirmation to clear all 
+            // No - skip task 
         
-    
-    
-
 }
