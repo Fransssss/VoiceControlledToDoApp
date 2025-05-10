@@ -81,7 +81,7 @@ if (!SpeechRecognition) {
     startButton.addEventListener('click', () => {
         if (!isListening) {
             //recognition.start();
-
+        
             //NOTE : temporary
             isListening = !isListening
             startButton.textContent = "Stop Listening"
